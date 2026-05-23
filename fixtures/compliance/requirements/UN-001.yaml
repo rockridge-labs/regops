@@ -1,0 +1,10 @@
+id: UN-001
+type: user_need
+title: "Accurate measurement display"
+description: >
+  As a clinician, I need the device to display accurate measurements
+  so that I can make reliable diagnostic decisions.
+safety_class: null
+parent_refs: []
+status: approved
+last_reviewed: 2025-10-01

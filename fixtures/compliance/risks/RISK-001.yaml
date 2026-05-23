@@ -1,0 +1,11 @@
+id: RISK-001
+title: "Insufficient sampling rate causing measurement error"
+hazard: HAZ-001
+description: >
+  If the signal sampling rate falls below specification, measurements
+  may be inaccurate leading to incorrect clinical decisions.
+severity: major
+probability: unlikely
+mitigation_refs: [MIT-001]
+residual_risk: acceptable
+status: approved

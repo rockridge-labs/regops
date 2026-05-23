@@ -1,0 +1,12 @@
+id: SR-004
+type: software_requirement
+title: "Measurement result display latency"
+description: >
+  The software shall display the measurement result within 500ms of
+  acquisition completion.
+safety_class: A
+parent_refs: [SYS-001]
+risk_refs: []
+test_refs: [TC-006]
+status: approved
+last_reviewed: 2025-11-15

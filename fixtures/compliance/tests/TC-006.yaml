@@ -1,0 +1,8 @@
+id: TC-006
+title: "Display latency under 500ms"
+type: system_test
+verifies_refs: [SR-004]
+file: tests/test_ui.py::test_display_latency
+regression: false
+last_run: 2026-03-15
+last_result: passed

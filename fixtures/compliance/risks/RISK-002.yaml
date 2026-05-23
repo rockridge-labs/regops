@@ -1,0 +1,11 @@
+id: RISK-002
+title: "Probe miscalibration leading to false measurement"
+hazard: HAZ-002
+description: >
+  If the probe is not properly calibrated, all measurements during
+  the session will be systematically offset.
+severity: critical
+probability: possible
+mitigation_refs: [MIT-002]
+residual_risk: acceptable
+status: approved

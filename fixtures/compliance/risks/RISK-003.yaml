@@ -1,0 +1,11 @@
+id: RISK-003
+title: "Calibration drift during session"
+hazard: HAZ-002
+description: >
+  Probe sensitivity may drift during a long measurement session,
+  causing progressive inaccuracy.
+severity: major
+probability: rare
+mitigation_refs: [MIT-003]
+residual_risk: acceptable
+status: approved

@@ -1,0 +1,46 @@
+# .regops/schema.yaml
+# Schéma de démonstration — dispositif médical logiciel classe IIa
+# Norme principale : IEC 62304 + ISO 14971
+
+node_types:
+
+  user_need:
+    label: "User Need"
+    abbreviation: "UN"
+    maps_to: user_need
+    requires_code: false
+
+  system_requirement:
+    label: "System Requirement"
+    abbreviation: "SYS"
+    maps_to: system_requirement
+    requires_code: false
+
+  software_requirement:
+    label: "Software Requirement"
+    abbreviation: "SR"
+    maps_to: software_requirement
+    requires_code: true
+
+  software_item:
+    label: "Software Item"
+    abbreviation: "SI"
+    maps_to: software_item
+    requires_code: true
+
+  software_unit:
+    label: "Software Unit"
+    abbreviation: "SU"
+    maps_to: software_unit
+    requires_code: true
+
+active_standards:
+  - iec_62304
+  - iso_14971
+
+project:
+  name: "AcmeDevice"
+  version: "2.1.0"
+  safety_class: B           # classe système globale IEC 62304
+  regulatory_targets:
+    - EU_MDR_Class_IIa

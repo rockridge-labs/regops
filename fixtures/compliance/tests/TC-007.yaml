@@ -1,0 +1,10 @@
+id: TC-007
+title: "Alarm triggered within 2s of signal loss"
+type: integration_test
+verifies_refs: [SR-005]
+file: tests/test_alarm.py::test_signal_loss_alarm_timing
+regression: true
+last_run: null
+last_result: not_run
+# NOTE FIXTURE: TC-007 references SR-005 which has no code annotation.
+# This demonstrates the gap chain: no annotation → not implemented → test never run.

@@ -1,0 +1,12 @@
+id: SR-001
+type: software_requirement
+title: "Signal acquisition sampling rate"
+description: >
+  The software shall acquire the input signal at a minimum of 1000 Hz
+  with no more than 0.1% jitter.
+safety_class: B
+parent_refs: [SYS-001]
+risk_refs: [RISK-001]
+test_refs: [TC-001, TC-002]
+status: approved
+last_reviewed: 2025-11-01

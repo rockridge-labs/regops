@@ -1,0 +1,14 @@
+id: SR-005
+type: software_requirement
+title: "Alarm on signal loss"
+description: >
+  The software shall trigger an audible and visual alarm within 2 seconds
+  of detecting signal loss during an active measurement session.
+safety_class: C
+parent_refs: [SYS-001]
+risk_refs: [RISK-005]
+test_refs: [TC-007]
+status: approved
+last_reviewed: 2025-12-01
+# NOTE FIXTURE: This requirement is intentionally NOT annotated in the code
+# to demonstrate the R-62304-NOT-IMPL gap detection.

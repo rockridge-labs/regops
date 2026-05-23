@@ -1,0 +1,12 @@
+id: SR-002
+type: software_requirement
+title: "Probe calibration accuracy"
+description: >
+  The software shall calibrate probe sensitivity within ±2% of the
+  reference standard before each measurement session.
+safety_class: C
+parent_refs: [SYS-001]
+risk_refs: [RISK-002, RISK-003]
+test_refs: [TC-003]
+status: approved
+last_reviewed: 2025-11-01

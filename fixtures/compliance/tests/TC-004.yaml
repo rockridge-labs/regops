@@ -1,0 +1,8 @@
+id: TC-004
+title: "DICOM header mandatory fields validation"
+type: unit_test
+verifies_refs: [SR-003]
+file: tests/test_dicom.py::test_mandatory_fields_present
+regression: true
+last_run: 2026-04-01
+last_result: passed

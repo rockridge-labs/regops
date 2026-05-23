@@ -1,0 +1,11 @@
+id: RISK-004
+title: "Corrupt DICOM data processed silently"
+hazard: HAZ-003
+description: >
+  If DICOM header fields are not validated, corrupt or malicious data
+  could be processed and lead to incorrect analysis results.
+severity: major
+probability: unlikely
+mitigation_refs: [MIT-004]
+residual_risk: acceptable
+status: approved

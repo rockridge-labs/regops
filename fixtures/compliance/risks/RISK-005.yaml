@@ -1,0 +1,11 @@
+id: RISK-005
+title: "Undetected signal loss during measurement"
+hazard: HAZ-004
+description: >
+  If signal loss is not detected and alarmed, the clinician may
+  continue a measurement session with no valid data input.
+severity: critical
+probability: possible
+mitigation_refs: [MIT-005]
+residual_risk: acceptable
+status: approved

@@ -1,0 +1,12 @@
+id: SR-003
+type: software_requirement
+title: "DICOM header validation"
+description: >
+  The software shall validate mandatory DICOM header fields before
+  processing any image data.
+safety_class: B
+parent_refs: [SYS-001]
+risk_refs: [RISK-004]
+test_refs: [TC-004, TC-005]
+status: approved
+last_reviewed: 2025-11-15

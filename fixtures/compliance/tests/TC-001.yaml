@@ -1,0 +1,8 @@
+id: TC-001
+title: "Signal acquisition at nominal sampling rate"
+type: unit_test
+verifies_refs: [SR-001]
+file: tests/test_signal.py::test_acquisition_nominal_rate
+regression: true
+last_run: 2026-04-01
+last_result: passed
