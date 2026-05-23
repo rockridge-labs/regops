@@ -284,9 +284,9 @@ Aucune ligne de code n'est écrite avant que Thomas ait validé un plan explicit
 
 Envoie le plan dans Slack, attends l'OK explicite avant de coder.
 
-#### 3. Branche `feature/*` depuis `main`
-- Toujours créer une branche `feature/<slug-court>` depuis `origin/main`
-- JAMAIS commit sur `main` directement
+#### 3. Branche `feature/*` depuis `master`
+- Toujours créer une branche `feature/<slug-court>` depuis `origin/master`
+- JAMAIS commit sur `master` directement
 
 #### 4. Limite de diff par PR : 200 lignes humaines max
 Si dépassement prévisible : signaler AVANT de coder, demander dérogation explicite.
