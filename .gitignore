@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets — NEVER commit
+*.pem
+*.key
+secrets.yaml
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Tachikoma session state
+.tachikoma/session-*.md
+
+# RegOps local outputs
+traceability-report*.md
+regops-report*.json
