@@ -18,23 +18,43 @@ from typing import Optional
 
 from regops.loader import ComplianceData
 from regops.parser import TraceLink
+from regops.schema import Schema, default_schema
 
-SW_REQUIREMENT_TYPES = {
+# Standard concepts whose node types should be referenced from source code.
+CODE_REQUIRED_CONCEPTS = {
     "software_requirement",
     "software_item",
     "software_unit",
 }
 
-NEEDS_CODE_TYPES = {
-    "software_requirement",
-    "software_item",
-    "software_unit",
-}
-
-NO_PARENT_EXEMPT_TYPES = {
+# Standard concepts exempt from the "must have a parent" rule.
+NO_PARENT_EXEMPT_CONCEPTS = {
     "user_need",
     "system_requirement",
 }
+
+
+def _resolve_schema(data: ComplianceData) -> Schema:
+    """Return the data's schema, or the built-in default if empty."""
+    return data.schema if data.schema.node_types else default_schema()
+
+
+def _types_needing_code(schema: Schema) -> set[str]:
+    """Set of node-type names that must be referenced in source code."""
+    out: set[str] = set()
+    for concept in CODE_REQUIRED_CONCEPTS:
+        out |= schema.types_with_maps_to(concept)
+    # A type can also opt-in via `requires_code: true` even if maps_to differs.
+    out |= {n for n, nt in schema.node_types.items() if nt.requires_code}
+    return out
+
+
+def _types_needing_parent(schema: Schema) -> set[str]:
+    """Set of node-type names that must declare a parent requirement."""
+    exempt: set[str] = set()
+    for concept in NO_PARENT_EXEMPT_CONCEPTS:
+        exempt |= schema.types_with_maps_to(concept)
+    return set(schema.node_types) - exempt
 
 
 @dataclass
@@ -52,6 +72,10 @@ def check_traceability(
     trace_links: list[TraceLink],
 ) -> list[Gap]:
     """Run all V1 rules and return list of gaps, ordered by severity."""
+
+    schema = _resolve_schema(data)
+    needs_code_types = _types_needing_code(schema)
+    needs_parent_types = _types_needing_parent(schema)
 
     gaps: list[Gap] = []
 
@@ -98,7 +122,7 @@ def check_traceability(
     # -------------------------------------------------------------------------
     for req_id, req in data.requirements.items():
 
-        needs_code = req.type in NEEDS_CODE_TYPES
+        needs_code = req.type in needs_code_types
 
         # R-62304-NOT-IMPL : SW requirement not referenced in code
         if needs_code and req_id not in covered_reqs:
@@ -148,7 +172,7 @@ def check_traceability(
                 ))
 
         # R-TRACE-NO-PARENT : SW requirement without parent
-        if (req.type not in NO_PARENT_EXEMPT_TYPES
+        if (req.type in needs_parent_types
                 and needs_code
                 and not req.parent_refs):
             gaps.append(Gap(
