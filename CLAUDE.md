@@ -291,9 +291,11 @@ Envoie le plan dans Slack, attends l'OK explicite avant de coder.
 #### 4. Limite de diff par PR : 200 lignes humaines max
 Si dépassement prévisible : signaler AVANT de coder, demander dérogation explicite.
 
-**Comptent dans les 200 lignes :** code applicatif, tests logique métier, config, CLAUDE.md, README, plans `.tachikoma/plans/`
+**Comptent dans les 200 lignes :** code applicatif (`regops/*.py` hors docstrings), config (pyproject.toml, hatch), CLAUDE.md, README, plans `.tachikoma/plans/`
 
-**Ne comptent pas :** `*.lock`, fixtures YAML de test (compliance/), snapshots pytest
+**Ne comptent pas :** code de test (`tests/`), docstrings, `*.lock`, fixtures YAML (compliance/, fixtures/), snapshots pytest
+
+*Note : un volume de tests déraisonnable peut être signalé en review au cas par cas.*
 
 #### 5. Tests obligatoires
 Toute PR touchant `parser.py`, `checker.py`, `loader.py`, ou `schema.py` DOIT inclure ou mettre à jour les tests pytest correspondants. Commande : `pytest tests/ -v`
