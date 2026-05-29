@@ -17,6 +17,16 @@ from rich.text import Text
 from regops.checker import Gap
 from regops.loader import ComplianceData
 from regops.parser import TraceLink
+from regops.schema import default_schema
+
+
+def _sw_req_types(data: ComplianceData) -> set[str]:
+    """Resolve which node-type names map to the SW requirement concepts."""
+    schema = data.schema if data.schema.node_types else default_schema()
+    out: set[str] = set()
+    for concept in ("software_requirement", "software_item", "software_unit"):
+        out |= schema.types_with_maps_to(concept)
+    return out
 
 
 SEVERITY_STYLE = {
@@ -37,7 +47,7 @@ def report_terminal(
 
     # Header
     total_reqs = len([r for r in data.requirements.values()
-                      if r.type in ("software_requirement", "software_item", "software_unit")])
+                      if r.type in _sw_req_types(data)])
     covered_reqs = len(set(
         req_id
         for link in trace_links
@@ -151,7 +161,7 @@ def report_markdown(
     ]
 
     total_reqs = len([r for r in data.requirements.values()
-                      if r.type in ("software_requirement", "software_item", "software_unit")])
+                      if r.type in _sw_req_types(data)])
     covered = len(set(
         req_id for link in trace_links
         for req_id in link.reqs

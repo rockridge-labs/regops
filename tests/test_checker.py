@@ -2,9 +2,14 @@
 
 import pytest
 from pathlib import Path
-from regops.parser import parse_repo
-from regops.loader import load_compliance
+from regops.parser import parse_repo, TraceLink
+from regops.loader import (
+    ComplianceData,
+    Requirement,
+    load_compliance,
+)
 from regops.checker import check_traceability
+from regops.schema import NodeType, Schema
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -51,3 +56,33 @@ def test_all_gaps_have_rule_id(gaps):
 def test_all_gaps_have_message(gaps):
     """Every gap must have a non-empty message."""
     assert all(g.message for g in gaps)
+
+
+def test_custom_schema_renamed_type_triggers_not_impl():
+    """A client schema renames `software_requirement` → `sw_req`.
+    A SR-xxx with type=sw_req must still produce R-62304-NOT-IMPL if not
+    referenced in code — proving the checker honours `maps_to`, not the type label."""
+    schema = Schema(node_types={
+        "sw_req": NodeType(
+            name="sw_req",
+            label="Software Requirement",
+            abbreviation="SW",
+            maps_to="software_requirement",
+            requires_code=True,
+        ),
+    })
+    data = ComplianceData(
+        requirements={
+            "SR-100": Requirement(
+                id="SR-100",
+                type="sw_req",          # the client's custom type name
+                title="Custom-typed requirement",
+                safety_class="B",
+                parent_refs=["SYS-001"],
+            ),
+        },
+        schema=schema,
+    )
+    gaps = check_traceability(data, trace_links=[])
+    not_impl = [g for g in gaps if g.rule_id == "R-62304-NOT-IMPL"]
+    assert "SR-100" in [g.node_id for g in not_impl]

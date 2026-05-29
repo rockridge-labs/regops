@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 import yaml
 
+from regops.schema import Schema, load_schema
+
 
 @dataclass
 class Requirement:
@@ -54,7 +56,7 @@ class ComplianceData:
     requirements: dict[str, Requirement] = field(default_factory=dict)
     risks: dict[str, Risk] = field(default_factory=dict)
     tests: dict[str, TestCase] = field(default_factory=dict)
-    schema: dict = field(default_factory=dict)
+    schema: Schema = field(default_factory=Schema)
 
 
 def load_compliance(root: Path) -> ComplianceData:
@@ -64,9 +66,8 @@ def load_compliance(root: Path) -> ComplianceData:
     compliance_dir = root / "compliance"
     schema_path = root / ".regops" / "schema.yaml"
 
-    # Load schema if present
-    if schema_path.exists():
-        data.schema = _load_yaml(schema_path) or {}
+    # Load schema (built-in default if file missing or malformed)
+    data.schema = load_schema(schema_path)
 
     # Load requirements
     req_dir = compliance_dir / "requirements"

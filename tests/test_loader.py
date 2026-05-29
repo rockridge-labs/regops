@@ -37,7 +37,7 @@ def test_tc003_is_unit_test():
 
 def test_schema_loaded():
     data = load_compliance(FIXTURES)
-    assert "node_types" in data.schema
+    assert "software_requirement" in data.schema.node_types
 
 
 def test_missing_compliance_dir_returns_empty():
