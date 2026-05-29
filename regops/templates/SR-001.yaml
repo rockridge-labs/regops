@@ -1,0 +1,12 @@
+id: SR-001
+type: software_requirement
+title: "Example software requirement"
+description: >
+  Replace this with a precise, testable software requirement.
+  Reference the parent SYS in parent_refs, expected tests in test_refs,
+  and any associated risks in risk_refs.
+safety_class: {{SAFETY_CLASS}}
+parent_refs: [SYS-001]
+risk_refs: [RISK-001]
+test_refs: [TC-001]
+status: draft

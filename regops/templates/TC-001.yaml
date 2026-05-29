@@ -1,0 +1,7 @@
+id: TC-001
+title: "Example test case"
+type: unit_test
+verifies_refs: [SR-001]
+file: "tests/test_example.py::test_example"
+regression: true
+last_result: not_run
