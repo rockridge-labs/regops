@@ -46,3 +46,11 @@ def _measure_jitter(samples: np.ndarray, nominal_rate: int) -> float:
 def _read_hardware_buffer(config: AcquisitionConfig) -> np.ndarray:
     """Hardware abstraction — implementation in C extension."""
     raise NotImplementedError("Implemented in _acme_hw Cython extension")
+
+
+# @req SR-001 @mitigation MIT-999 @class B
+def _watchdog_timer(config: AcquisitionConfig) -> None:
+    """Watchdog asserting acquisition completes within deadline.
+    MIT-999 is declared here but not (yet) referenced from any risk file —
+    fixture for R-14971-MIT-ORPHAN."""
+    pass

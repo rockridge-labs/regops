@@ -30,6 +30,7 @@ class Requirement:
     risk_refs: list[str] = field(default_factory=list)
     test_refs: list[str] = field(default_factory=list)
     status: str = "draft"
+    last_reviewed: Optional[str] = None    # ISO date (YYYY-MM-DD)
 
 
 @dataclass
@@ -39,6 +40,9 @@ class Risk:
     severity: str                           # critical | major | minor
     mitigation_refs: list[str] = field(default_factory=list)
     status: str = "draft"
+    hazard: Optional[str] = None           # HAZ-xxx identifier (ISO 14971)
+    probability: Optional[str] = None      # frequent | probable | occasional | remote | improbable | unlikely | possible
+    residual_risk: Optional[str] = None    # acceptable | unacceptable | als_low_as_reasonably_practicable
 
 
 @dataclass
@@ -49,6 +53,8 @@ class TestCase:
     verifies_refs: list[str] = field(default_factory=list)
     regression: bool = False
     last_result: Optional[str] = None      # passed | failed | not_run | None
+    file: Optional[str] = None             # pointer e.g. tests/test_calibration.py::test_xxx
+    last_run: Optional[str] = None         # ISO date of last execution
 
 
 @dataclass
@@ -85,6 +91,7 @@ def load_compliance(root: Path) -> ComplianceData:
                     risk_refs=raw.get("risk_refs", []),
                     test_refs=raw.get("test_refs", []),
                     status=raw.get("status", "draft"),
+                    last_reviewed=_iso_date(raw.get("last_reviewed")),
                 )
                 data.requirements[req.id] = req
 
@@ -100,6 +107,9 @@ def load_compliance(root: Path) -> ComplianceData:
                     severity=raw.get("severity", "minor"),
                     mitigation_refs=raw.get("mitigation_refs", []),
                     status=raw.get("status", "draft"),
+                    hazard=raw.get("hazard"),
+                    probability=raw.get("probability"),
+                    residual_risk=raw.get("residual_risk"),
                 )
                 data.risks[risk.id] = risk
 
@@ -116,6 +126,8 @@ def load_compliance(root: Path) -> ComplianceData:
                     verifies_refs=raw.get("verifies_refs", []),
                     regression=raw.get("regression", False),
                     last_result=raw.get("last_result"),
+                    file=raw.get("file"),
+                    last_run=_iso_date(raw.get("last_run")),
                 )
                 data.tests[tc.id] = tc
 
@@ -128,3 +140,11 @@ def _load_yaml(path: Path) -> Optional[dict]:
             return yaml.safe_load(f)
     except Exception:
         return None
+
+
+def _iso_date(value) -> Optional[str]:
+    """Normalize a YAML date value to ISO 8601 string. PyYAML auto-parses
+    YYYY-MM-DD to datetime.date; we want a string for downstream serialisation."""
+    if value is None:
+        return None
+    return value.isoformat() if hasattr(value, "isoformat") else str(value)
