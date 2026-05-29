@@ -33,6 +33,32 @@ NO_PARENT_EXEMPT_CONCEPTS = {
     "system_requirement",
 }
 
+# Single source of truth for rule severity. Edit here to change a rule's
+# baseline severity — overrides may still happen in code (e.g. R-14971-RISK-NO-MIT
+# escalates to critical when the underlying risk is critical).
+RULE_SEVERITY: dict[str, str] = {
+    "R-62304-NOT-IMPL":      "critical",
+    "R-62304-NO-CLASS":      "warning",
+    "R-62304-CLASS-C-TEST":  "critical",
+    "R-62304-CLASS-B-TEST":  "warning",
+    "R-14971-RISK-NO-MIT":   "warning",
+    "R-14971-MIT-ORPHAN":    "warning",
+    "R-TRACE-ORPHAN-REQ":    "critical",
+    "R-TRACE-NO-PARENT":     "warning",
+}
+
+# Normative reference per rule (aligned with CLAUDE.md §"Règles de conformité V1").
+RULE_REFERENCE: dict[str, str] = {
+    "R-62304-NOT-IMPL":      "IEC 62304 §5.3",
+    "R-62304-NO-CLASS":      "IEC 62304 §4.3",
+    "R-62304-CLASS-C-TEST":  "IEC 62304 §5.5.2",
+    "R-62304-CLASS-B-TEST":  "IEC 62304 §5.5.2",
+    "R-14971-RISK-NO-MIT":   "ISO 14971 §6.3",
+    "R-14971-MIT-ORPHAN":    "ISO 14971 §6.4",
+    "R-TRACE-ORPHAN-REQ":    "Traçabilité",
+    "R-TRACE-NO-PARENT":     "IEC 62304 §5.2",
+}
+
 
 def _resolve_schema(data: ComplianceData) -> Schema:
     """Return the data's schema, or the built-in default if empty."""
@@ -106,7 +132,7 @@ def check_traceability(
         for req_id in link.reqs:
             if req_id not in data.requirements:
                 gaps.append(Gap(
-                    severity="critical",
+                    severity=RULE_SEVERITY["R-TRACE-ORPHAN-REQ"],
                     rule_id="R-TRACE-ORPHAN-REQ",
                     node_id=req_id,
                     message=(
@@ -114,7 +140,29 @@ def check_traceability(
                         f"but not found in compliance/requirements/"
                     ),
                     details={"file": link.file, "line": link.line},
-                    reference="IEC 62304 §5.3",
+                    reference=RULE_REFERENCE["R-TRACE-ORPHAN-REQ"],
+                ))
+
+    # -------------------------------------------------------------------------
+    # R-14971-MIT-ORPHAN : @mitigation MIT-xxx in code with no risk referencing it
+    # -------------------------------------------------------------------------
+    declared_mitigations: set[str] = set()
+    for risk in data.risks.values():
+        declared_mitigations.update(risk.mitigation_refs)
+
+    for link in trace_links:
+        for mit_id in link.mitigations:
+            if mit_id not in declared_mitigations:
+                gaps.append(Gap(
+                    severity=RULE_SEVERITY["R-14971-MIT-ORPHAN"],
+                    rule_id="R-14971-MIT-ORPHAN",
+                    node_id=mit_id,
+                    message=(
+                        f"{mit_id} — referenced in code ({link.file}:{link.line}) "
+                        f"but not declared in any risk's mitigation_refs"
+                    ),
+                    details={"file": link.file, "line": link.line},
+                    reference=RULE_REFERENCE["R-14971-MIT-ORPHAN"],
                 ))
 
     # -------------------------------------------------------------------------
@@ -127,48 +175,48 @@ def check_traceability(
         # R-62304-NOT-IMPL : SW requirement not referenced in code
         if needs_code and req_id not in covered_reqs:
             gaps.append(Gap(
-                severity="critical",
+                severity=RULE_SEVERITY["R-62304-NOT-IMPL"],
                 rule_id="R-62304-NOT-IMPL",
                 node_id=req_id,
                 message=f"{req_id} ({req.type}) — no code annotation found",
                 details={"title": req.title, "type": req.type},
-                reference="IEC 62304 §5.3",
+                reference=RULE_REFERENCE["R-62304-NOT-IMPL"],
             ))
             continue  # No point checking test coverage if not implemented
 
         # R-62304-NO-CLASS : SW requirement without safety_class
         if needs_code and req.safety_class is None:
             gaps.append(Gap(
-                severity="warning",
+                severity=RULE_SEVERITY["R-62304-NO-CLASS"],
                 rule_id="R-62304-NO-CLASS",
                 node_id=req_id,
                 message=f"{req_id} — no safety_class declared (A, B, or C required)",
                 details={"title": req.title},
-                reference="IEC 62304 §4.3",
+                reference=RULE_REFERENCE["R-62304-NO-CLASS"],
             ))
 
         # R-62304-CLASS-C-TEST : Class C needs unit test
         if needs_code and req.safety_class == "C":
             if req_id not in req_has_unit_test:
                 gaps.append(Gap(
-                    severity="critical",
+                    severity=RULE_SEVERITY["R-62304-CLASS-C-TEST"],
                     rule_id="R-62304-CLASS-C-TEST",
                     node_id=req_id,
                     message=f"{req_id} (class C) — no unit test found in compliance/tests/",
                     details={"title": req.title, "safety_class": "C"},
-                    reference="IEC 62304 §5.5.2",
+                    reference=RULE_REFERENCE["R-62304-CLASS-C-TEST"],
                 ))
 
         # R-62304-CLASS-B-TEST : Class B needs at least one test
         elif needs_code and req.safety_class == "B":
             if req_id not in req_has_any_test:
                 gaps.append(Gap(
-                    severity="warning",
+                    severity=RULE_SEVERITY["R-62304-CLASS-B-TEST"],
                     rule_id="R-62304-CLASS-B-TEST",
                     node_id=req_id,
                     message=f"{req_id} (class B) — no test found in compliance/tests/",
                     details={"title": req.title, "safety_class": "B"},
-                    reference="IEC 62304 §5.5.1",
+                    reference=RULE_REFERENCE["R-62304-CLASS-B-TEST"],
                 ))
 
         # R-TRACE-NO-PARENT : SW requirement without parent
@@ -176,12 +224,12 @@ def check_traceability(
                 and needs_code
                 and not req.parent_refs):
             gaps.append(Gap(
-                severity="warning",
+                severity=RULE_SEVERITY["R-TRACE-NO-PARENT"],
                 rule_id="R-TRACE-NO-PARENT",
                 node_id=req_id,
                 message=f"{req_id} — no parent requirement declared (SYS or UN expected)",
                 details={"title": req.title},
-                reference="IEC 62304 §5.2",
+                reference=RULE_REFERENCE["R-TRACE-NO-PARENT"],
             ))
 
     # -------------------------------------------------------------------------
@@ -192,18 +240,21 @@ def check_traceability(
         # R-14971-RISK-NO-MIT : risk with no mitigation in code
         if not risk.mitigation_refs:
             gaps.append(Gap(
-                severity="warning",
+                severity=RULE_SEVERITY["R-14971-RISK-NO-MIT"],
                 rule_id="R-14971-RISK-NO-MIT",
                 node_id=risk_id,
                 message=f"{risk_id} — no mitigation_refs declared in risk file",
                 details={"title": risk.title, "severity": risk.severity},
-                reference="ISO 14971 §6.3",
+                reference=RULE_REFERENCE["R-14971-RISK-NO-MIT"],
             ))
         else:
             for mit_id in risk.mitigation_refs:
                 if mit_id not in covered_mitigations:
+                    # Critical risk losing its mitigation → escalate to critical.
+                    sev = ("critical" if risk.severity == "critical"
+                           else RULE_SEVERITY["R-14971-RISK-NO-MIT"])
                     gaps.append(Gap(
-                        severity="critical" if risk.severity == "critical" else "warning",
+                        severity=sev,
                         rule_id="R-14971-RISK-NO-MIT",
                         node_id=risk_id,
                         message=(
@@ -215,7 +266,7 @@ def check_traceability(
                             "mitigation": mit_id,
                             "risk_severity": risk.severity,
                         },
-                        reference="ISO 14971 §6.3",
+                        reference=RULE_REFERENCE["R-14971-RISK-NO-MIT"],
                     ))
 
     # Sort: critical first, then warning, then info

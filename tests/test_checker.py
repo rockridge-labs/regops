@@ -58,6 +58,48 @@ def test_all_gaps_have_message(gaps):
     assert all(g.message for g in gaps)
 
 
+def test_mit_orphan_detected_on_mit_999(gaps):
+    """MIT-999 is annotated in signal.py but absent from all risk files
+    → must trigger R-14971-MIT-ORPHAN."""
+    orphans = [g for g in gaps if g.rule_id == "R-14971-MIT-ORPHAN"]
+    node_ids = [g.node_id for g in orphans]
+    assert "MIT-999" in node_ids, f"Expected MIT-999 in {node_ids}"
+
+
+def test_mit_orphan_does_not_trigger_for_declared_mitigations(gaps):
+    """MIT-001..MIT-004 are declared in some risk's mitigation_refs
+    → must NOT trigger R-14971-MIT-ORPHAN."""
+    orphans = [g for g in gaps if g.rule_id == "R-14971-MIT-ORPHAN"]
+    node_ids = {g.node_id for g in orphans}
+    declared = {"MIT-001", "MIT-002", "MIT-003", "MIT-004"}
+    assert not (declared & node_ids), \
+        f"Declared mitigations falsely flagged as orphan: {declared & node_ids}"
+
+
+def test_class_b_test_rule_uses_iec_62304_5_5_2():
+    """R-62304-CLASS-B-TEST normative reference must be aligned with CLAUDE.md (§5.5.2)."""
+    from regops.checker import RULE_REFERENCE
+    assert RULE_REFERENCE["R-62304-CLASS-B-TEST"] == "IEC 62304 §5.5.2"
+
+
+def test_orphan_req_uses_tracability_category():
+    """R-TRACE-ORPHAN-REQ category must be 'Traçabilité' per CLAUDE.md ligne 245."""
+    from regops.checker import RULE_REFERENCE
+    assert RULE_REFERENCE["R-TRACE-ORPHAN-REQ"] == "Traçabilité"
+
+
+def test_rule_severity_is_central_source_of_truth():
+    """All eight V1 rules must have an entry in RULE_SEVERITY."""
+    from regops.checker import RULE_SEVERITY
+    expected = {
+        "R-62304-NOT-IMPL", "R-62304-NO-CLASS",
+        "R-62304-CLASS-C-TEST", "R-62304-CLASS-B-TEST",
+        "R-14971-RISK-NO-MIT", "R-14971-MIT-ORPHAN",
+        "R-TRACE-ORPHAN-REQ", "R-TRACE-NO-PARENT",
+    }
+    assert set(RULE_SEVERITY) == expected
+
+
 def test_custom_schema_renamed_type_triggers_not_impl():
     """A client schema renames `software_requirement` → `sw_req`.
     A SR-xxx with type=sw_req must still produce R-62304-NOT-IMPL if not
