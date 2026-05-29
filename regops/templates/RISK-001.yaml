@@ -1,0 +1,12 @@
+id: RISK-001
+title: "Example risk"
+hazard: HAZ-001
+description: >
+  Replace this with a real hazard analysis entry per ISO 14971.
+  Severity, probability, and residual_risk should reflect your
+  risk evaluation.
+severity: minor
+probability: unlikely
+mitigation_refs: [MIT-001]
+residual_risk: acceptable
+status: draft

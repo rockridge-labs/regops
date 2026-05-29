@@ -1,0 +1,8 @@
+id: SYS-001
+type: system_requirement
+title: "Example system requirement"
+description: >
+  Replace this with a concrete, verifiable system-level requirement
+  that derives from a user need or another upstream input.
+parent_refs: [UN-001]
+status: draft

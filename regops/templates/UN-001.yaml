@@ -1,0 +1,8 @@
+id: UN-001
+type: user_need
+title: "Example user need"
+description: >
+  Replace this with the actual clinical or operational need this device
+  addresses. Keep it user-centred (what the user wants to achieve), not
+  implementation-centred.
+status: draft

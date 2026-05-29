@@ -29,6 +29,9 @@ regops = "regops.cli:app"
 [tool.hatch.build.targets.wheel]
 packages = ["regops"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"regops/templates" = "regops/templates"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
