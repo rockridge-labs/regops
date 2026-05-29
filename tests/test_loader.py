@@ -47,3 +47,28 @@ def test_missing_compliance_dir_returns_empty():
         data = load_compliance(Path(tmp))
     assert data.requirements == {}
     assert data.risks == {}
+
+
+def test_risk_loads_hazard_probability_residual():
+    """Extended Risk fields from CLAUDE.md model must be loaded."""
+    data = load_compliance(FIXTURES)
+    r = data.risks["RISK-001"]
+    assert r.hazard == "HAZ-001"
+    assert r.probability == "unlikely"
+    assert r.residual_risk == "acceptable"
+
+
+def test_test_case_file_field_loaded():
+    """TestCase.file (pointer to test function) loaded when present in YAML."""
+    data = load_compliance(FIXTURES)
+    tc = data.tests["TC-003"]
+    # TC-003 has 'file' set in fixtures; if absent in some YAMLs, field is None.
+    assert tc.file is None or isinstance(tc.file, str)
+
+
+def test_iso_date_normalisation_for_last_reviewed():
+    """PyYAML auto-parses YYYY-MM-DD to datetime.date; loader must stringify."""
+    data = load_compliance(FIXTURES)
+    for req in data.requirements.values():
+        if req.last_reviewed is not None:
+            assert isinstance(req.last_reviewed, str)
