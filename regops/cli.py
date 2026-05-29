@@ -71,17 +71,41 @@ def init(
     standard: str = typer.Option(
         "iec62304",
         "--standard",
-        help="Regulatory standard (iec62304, iso14971).",
+        help="Regulatory standard (iec62304, iso14971, iso13485).",
     ),
     safety_class: str = typer.Option(
         "B",
         "--class",
         help="Software safety class (A, B, C).",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Overwrite existing files in target repo.",
+    ),
 ) -> None:
     """Bootstrap compliance structure in a repository."""
+    from regops.bootstrap import bootstrap_repo
+
     console.print(f"[bold]RegOps init[/bold] — {repo.resolve()}")
-    console.print("[yellow]Not yet implemented — coming in next PR.[/yellow]")
+
+    try:
+        created = bootstrap_repo(repo, standard, safety_class, force)
+    except FileExistsError as e:
+        console.print(
+            f"[red]Aborting — {e} already exists. "
+            f"Re-run with [bold]--force[/bold] to overwrite.[/red]"
+        )
+        raise typer.Exit(code=1)
+
+    for path in created:
+        console.print(f"  [green]+[/green] {path.relative_to(repo)}")
+
+    console.print()
+    console.print("[bold]Next steps:[/bold]")
+    console.print("  1. Edit [cyan].regops/schema.yaml[/cyan] to match your taxonomy.")
+    console.print("  2. Replace example files in [cyan]compliance/[/cyan] with your real artefacts.")
+    console.print("  3. Run [cyan]regops check[/cyan] to validate.")
 
 
 @app.command()
