@@ -4,6 +4,7 @@ Output formatters: Rich terminal, JSON, Markdown.
 """
 
 import json
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -29,6 +30,35 @@ def _sw_req_types(data: ComplianceData) -> set[str]:
     return out
 
 
+def _git_short_sha(repo: Path) -> Optional[str]:
+    """Return short SHA of HEAD in `repo` if available, else None.
+    Fails silently when git is missing, repo is not a git tree, or it has no commits yet."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=repo, capture_output=True, text=True, timeout=2, check=False,
+        )
+        if result.returncode == 0:
+            sha = result.stdout.strip()
+            return sha or None
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def _coverage(data: ComplianceData, trace_links: list[TraceLink]) -> tuple[int, int, float]:
+    """(covered_reqs, total_sw_reqs, pct) — used in both terminal and markdown outputs."""
+    sw_types = _sw_req_types(data)
+    total = len([r for r in data.requirements.values() if r.type in sw_types])
+    covered = len(set(
+        req_id for link in trace_links
+        for req_id in link.reqs
+        if req_id in data.requirements
+    ))
+    pct = (covered / total * 100) if total > 0 else 0.0
+    return covered, total, pct
+
+
 SEVERITY_STYLE = {
     "critical": ("bold red", "✗"),
     "warning":  ("yellow",   "⚠"),
@@ -45,29 +75,34 @@ def report_terminal(
 ) -> None:
     """Print formatted report to terminal using Rich."""
 
-    # Header
-    total_reqs = len([r for r in data.requirements.values()
-                      if r.type in _sw_req_types(data)])
-    covered_reqs = len(set(
-        req_id
-        for link in trace_links
-        for req_id in link.reqs
-        if req_id in data.requirements
-    ))
-    coverage_pct = (covered_reqs / total_reqs * 100) if total_reqs > 0 else 0.0
+    covered_reqs, total_reqs, coverage_pct = _coverage(data, trace_links)
+    sha = _git_short_sha(repo)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     console.print()
     console.print("[bold]RegOps Traceability Report[/bold]")
-    console.print(f"Repo : [cyan]{repo.resolve()}[/cyan]")
-    console.print(f"Date : {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    header = f"Repo : [cyan]{repo.resolve()}[/cyan]"
+    if sha:
+        header += f"  |  Commit : [cyan]{sha}[/cyan]"
+    header += f"  |  {now_str}"
+    console.print(header)
     console.print()
 
     if not gaps:
+        info_style, info_icon = SEVERITY_STYLE["info"]
+        console.print(
+            Text(
+                f"{info_icon} INFO   {covered_reqs} / {total_reqs} SW requirements covered "
+                f"({coverage_pct:.0f}%)",
+                style=info_style,
+            )
+        )
+        console.print()
         console.print("[bold green]✓ No gaps found. Submission readiness: CLEAR[/bold green]")
         console.print()
         return
 
-    # Gaps table
+    # Gaps table — coverage info appended as the final row.
     table = Table(box=box.SIMPLE, show_header=True, header_style="bold")
     table.add_column("Sev.", width=10)
     table.add_column("Rule", width=28)
@@ -81,6 +116,16 @@ def report_terminal(
             gap.message,
         )
 
+    info_style, info_icon = SEVERITY_STYLE["info"]
+    table.add_row(
+        Text(f"{info_icon} INFO", style=info_style),
+        Text("", style="dim"),
+        Text(
+            f"{covered_reqs} / {total_reqs} SW requirements covered ({coverage_pct:.0f}%)",
+            style=info_style,
+        ),
+    )
+
     console.print(table)
 
     # Summary
@@ -88,11 +133,7 @@ def report_terminal(
     warning_count  = sum(1 for g in gaps if g.severity == "warning")
 
     console.print(
-        f"Coverage : [cyan]{covered_reqs}/{total_reqs}[/cyan] "
-        f"SW requirements annotated ({coverage_pct:.0f}%)"
-    )
-    console.print(
-        f"Gaps     : [red]{critical_count} critical[/red]"
+        f"Gaps : [red]{critical_count} critical[/red]"
         f"  [yellow]{warning_count} warnings[/yellow]"
     )
     console.print()
@@ -131,10 +172,17 @@ def report_markdown(
 ) -> None:
     """Write a markdown traceability report to file."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    sha = _git_short_sha(repo)
+    covered, total_reqs, coverage_pct = _coverage(data, trace_links)
+
     lines = [
         f"# RegOps Traceability Report",
         f"",
         f"**Repo:** `{repo.resolve()}`  ",
+    ]
+    if sha:
+        lines.append(f"**Commit:** `{sha}`  ")
+    lines += [
         f"**Generated:** {now}  ",
         f"",
         f"---",
@@ -152,26 +200,12 @@ def report_markdown(
             f"| {gap.message} | {gap.reference} |"
         )
 
-    lines += [
-        f"",
-        f"---",
-        f"",
-        f"## Coverage",
-        f"",
-    ]
-
-    total_reqs = len([r for r in data.requirements.values()
-                      if r.type in _sw_req_types(data)])
-    covered = len(set(
-        req_id for link in trace_links
-        for req_id in link.reqs
-        if req_id in data.requirements
-    ))
-    lines.append(
-        f"- SW requirements annotated: **{covered}/{total_reqs}** "
-        f"({covered/total_reqs*100:.0f}%)" if total_reqs > 0
-        else "- No SW requirements found."
-    )
+    # Append coverage as an INFO row inside the gaps table.
+    if total_reqs > 0:
+        lines.append(
+            f"| 🔵 INFO |  | {covered} / {total_reqs} SW requirements covered "
+            f"({coverage_pct:.0f}%) | Coverage |"
+        )
 
     critical = sum(1 for g in gaps if g.severity == "critical")
     readiness = "BLOCKED" if critical > 0 else ("REVIEW NEEDED" if gaps else "CLEAR")
