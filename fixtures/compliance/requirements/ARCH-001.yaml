@@ -1,0 +1,11 @@
+id: ARCH-001
+type: architectural_need
+title: "DICOM-conformant interfaces"
+description: >
+  All imaging interfaces shall comply with the DICOM standard
+  (PS3.x) to allow interoperability with hospital PACS deployments
+  without bespoke gateways.
+safety_class: null
+parent_refs: []
+status: approved
+last_reviewed: 2025-08-21

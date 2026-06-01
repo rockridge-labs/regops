@@ -1,0 +1,8 @@
+id: SEC-001
+type: security_need
+title: "Example security need"
+description: >
+  Replace this with a concrete security or safety driver (e.g.
+  "Encrypt all PHI in transit per IEC 81001-5-1"). Security needs
+  feed risk_refs and often mandate cryptographic or process controls.
+status: draft

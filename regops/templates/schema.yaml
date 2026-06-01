@@ -11,6 +11,24 @@ node_types:
     maps_to: user_need
     requires_code: false
 
+  regulatory_need:
+    label: "Regulatory Need"
+    abbreviation: "REG"
+    maps_to: user_need
+    requires_code: false
+
+  security_need:
+    label: "Security Need"
+    abbreviation: "SEC"
+    maps_to: user_need
+    requires_code: false
+
+  architectural_need:
+    label: "Architectural Need"
+    abbreviation: "ARCH"
+    maps_to: user_need
+    requires_code: false
+
   system_requirement:
     label: "System Requirement"
     abbreviation: "SYS"

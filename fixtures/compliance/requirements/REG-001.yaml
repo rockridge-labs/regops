@@ -1,0 +1,11 @@
+id: REG-001
+type: regulatory_need
+title: "Conformance to EU MDR Annex II §6"
+description: >
+  The device documentation shall include the design and manufacturing
+  information required by EU MDR Annex II §6 (general safety and
+  performance requirements traceability).
+safety_class: null
+parent_refs: []
+status: approved
+last_reviewed: 2025-09-12

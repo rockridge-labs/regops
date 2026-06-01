@@ -1,0 +1,9 @@
+id: ARCH-001
+type: architectural_need
+title: "Example architectural need"
+description: >
+  Replace this with a concrete architectural or interoperability
+  constraint (e.g. "DICOM-conformant imaging interfaces", "ARM64-only
+  hardware target"). Architectural needs are technical choices that
+  shape downstream SYS requirements.
+status: draft
