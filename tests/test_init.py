@@ -61,6 +61,15 @@ def test_bootstrap_output_is_loadable_by_loader(tmp_path):
     assert data.schema.node_types["software_requirement"].requires_code is True
 
 
+def test_bootstrap_creates_extended_need_files(tmp_path):
+    """The init scaffold must include REG/SEC/ARCH need examples so users
+    discover the extended taxonomy without reading docs first."""
+    bootstrap_repo(tmp_path)
+    reqs_dir = tmp_path / "compliance" / "requirements"
+    for name in ("REG-001.yaml", "SEC-001.yaml", "ARCH-001.yaml"):
+        assert (reqs_dir / name).exists(), f"missing {name}"
+
+
 def test_bootstrap_no_unresolved_placeholders(tmp_path):
     bootstrap_repo(tmp_path)
     for rel in TEMPLATE_TARGETS.values():

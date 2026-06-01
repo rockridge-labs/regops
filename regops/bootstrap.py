@@ -16,6 +16,9 @@ from pathlib import Path
 TEMPLATE_TARGETS: dict[str, str] = {
     "schema.yaml":   ".regops/schema.yaml",
     "UN-001.yaml":   "compliance/requirements/UN-001.yaml",
+    "REG-001.yaml":  "compliance/requirements/REG-001.yaml",
+    "SEC-001.yaml":  "compliance/requirements/SEC-001.yaml",
+    "ARCH-001.yaml": "compliance/requirements/ARCH-001.yaml",
     "SYS-001.yaml":  "compliance/requirements/SYS-001.yaml",
     "SR-001.yaml":   "compliance/requirements/SR-001.yaml",
     "RISK-001.yaml": "compliance/risks/RISK-001.yaml",

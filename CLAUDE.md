@@ -92,11 +92,24 @@ void DicomParser::parseHeader(const Buffer& buf) { ... }
 ```
 
 Tags supportés :
-- `@req <ID>` — référence une exigence (SR-xxx, SYS-xxx, UN-xxx, SI-xxx, SU-xxx)
+- `@req <ID>` — référence une exigence ou un besoin (SR-xxx, SYS-xxx, UN-xxx, REG-xxx, SEC-xxx, ARCH-xxx, SI-xxx, SU-xxx)
 - `@risk <ID>` — référence un risque (RISK-xxx)
 - `@class <A|B|C>` — classe de sécurité IEC 62304
 - `@mitigation <ID>` — référence une mitigation (MIT-xxx)
 - `@test <ID>` — référence un test case (TC-xxx)
+
+### Taxonomie des besoins (needs)
+
+RegOps modélise plusieurs *sources de besoin* mappant toutes au concept standard `user_need` (au sens ISO 13485:2016 §7.3 *Stakeholder Needs*) :
+
+| Type | Préfixe | Origine |
+|---|---|---|
+| `user_need` | UN | Besoin clinique ou opérationnel de l'utilisateur final |
+| `regulatory_need` | REG | Conformité à une norme ou loi externe (MDR, IEC 62304, FDA…) |
+| `security_need` | SEC | Cybersécurité, sécurité patient (ISO 14971, IEC 81001-5-1, HIPAA, GDPR) |
+| `architectural_need` | ARCH | Contrainte technique (interop, plateforme, langage…) |
+
+Tous mappent à `user_need` comme concept standard — les règles de conformité (R-TRACE-NO-PARENT, etc.) s'appliquent uniformément, et un SYS peut déclarer `parent_refs: [UN-001, SEC-001]` pour tracer une origine composite.
 
 ### Structure YAML des exigences (compliance/requirements/SR-xxx.yaml)
 
@@ -151,6 +164,24 @@ node_types:
   user_need:
     label: "User Need"
     abbreviation: "UN"
+    maps_to: user_need
+    requires_code: false
+
+  regulatory_need:                 # même concept standard, classification fine
+    label: "Regulatory Need"
+    abbreviation: "REG"
+    maps_to: user_need
+    requires_code: false
+
+  security_need:
+    label: "Security Need"
+    abbreviation: "SEC"
+    maps_to: user_need
+    requires_code: false
+
+  architectural_need:
+    label: "Architectural Need"
+    abbreviation: "ARCH"
     maps_to: user_need
     requires_code: false
 
@@ -243,7 +274,7 @@ $ regops report --output traceability-report-2026-05.md
 | R-14971-RISK-NO-MIT | ISO 14971 §6.3 | Risque sans mitigation référencée dans le code | critical |
 | R-14971-MIT-ORPHAN | ISO 14971 §6.4 | Mitigation référencée dans le code mais absente du risk file | warning |
 | R-TRACE-ORPHAN-REQ | Traçabilité | Annotation @req pointant vers un ID inexistant | critical |
-| R-TRACE-NO-PARENT | IEC 62304 §5.2 | SR sans parent SYS ou UN déclaré | warning |
+| R-TRACE-NO-PARENT | IEC 62304 §5.2 | SR sans parent (SYS ou tout type mappant à `user_need` : UN, REG, SEC, ARCH) déclaré | warning |
 
 ---
 

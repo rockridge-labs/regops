@@ -86,6 +86,24 @@ def test_malformed_yaml_returns_default():
         tmp.unlink()
 
 
+def test_fixture_schema_includes_extended_need_types():
+    """REG-/SEC-/ARCH- need types must be present in the fixture schema."""
+    schema = load_schema(FIXTURE_SCHEMA)
+    for tname in ("regulatory_need", "security_need", "architectural_need"):
+        assert tname in schema.node_types, f"missing {tname}"
+        nt = schema.node_types[tname]
+        assert nt.maps_to == "user_need", f"{tname} must map to user_need concept"
+        assert nt.requires_code is False, f"{tname} should not require code"
+
+
+def test_extended_need_types_all_map_to_user_need_concept():
+    """A schema with the extended taxonomy must expose 4 types under the
+    `user_need` standard concept — UN + REG + SEC + ARCH."""
+    schema = load_schema(FIXTURE_SCHEMA)
+    types = schema.types_with_maps_to("user_need")
+    assert types == {"user_need", "regulatory_need", "security_need", "architectural_need"}
+
+
 def test_empty_node_types_returns_default():
     with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as f:
         f.write("active_standards: [iec_62304]\n")

@@ -1,0 +1,8 @@
+id: REG-001
+type: regulatory_need
+title: "Example regulatory need"
+description: >
+  Replace this with a concrete regulatory obligation (e.g. "Conform to
+  EU MDR Annex II §6 traceability requirements"). Regulatory needs
+  derive from external standards or laws, not from user requests.
+status: draft

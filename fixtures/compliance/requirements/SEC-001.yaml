@@ -1,0 +1,11 @@
+id: SEC-001
+type: security_need
+title: "Patient data confidentiality"
+description: >
+  The device shall protect patient health information against
+  unauthorised disclosure in storage and in transit, per IEC 81001-5-1
+  and applicable HIPAA / GDPR requirements.
+safety_class: null
+parent_refs: []
+status: approved
+last_reviewed: 2025-11-03

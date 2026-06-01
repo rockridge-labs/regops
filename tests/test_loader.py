@@ -66,6 +66,25 @@ def test_test_case_file_field_loaded():
     assert tc.file is None or isinstance(tc.file, str)
 
 
+def test_extended_need_fixtures_loaded():
+    """REG-/SEC-/ARCH-001 fixtures must load with the expected need types."""
+    data = load_compliance(FIXTURES)
+    for nid, expected_type in [
+        ("REG-001", "regulatory_need"),
+        ("SEC-001", "security_need"),
+        ("ARCH-001", "architectural_need"),
+    ]:
+        assert nid in data.requirements, f"{nid} missing"
+        assert data.requirements[nid].type == expected_type
+
+
+def test_sys001_has_composite_parents():
+    """SYS-001 demos composite parentage: both a user_need and a security_need."""
+    data = load_compliance(FIXTURES)
+    parents = set(data.requirements["SYS-001"].parent_refs)
+    assert parents == {"UN-001", "SEC-001"}
+
+
 def test_iso_date_normalisation_for_last_reviewed():
     """PyYAML auto-parses YYYY-MM-DD to datetime.date; loader must stringify."""
     data = load_compliance(FIXTURES)

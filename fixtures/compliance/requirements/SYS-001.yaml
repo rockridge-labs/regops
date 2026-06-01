@@ -5,6 +5,6 @@ description: >
   The system shall display measurements within ±2% of the reference standard
   under all specified operating conditions.
 safety_class: null
-parent_refs: [UN-001]
+parent_refs: [UN-001, SEC-001]
 status: approved
 last_reviewed: 2025-10-15
