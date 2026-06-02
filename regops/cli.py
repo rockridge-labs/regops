@@ -108,6 +108,57 @@ def init(
     console.print("  3. Run [cyan]regops check[/cyan] to validate.")
 
 
+@app.command("import")
+def import_(
+    from_: str = typer.Option(
+        ...,
+        "--from",
+        help="Importer name (see `regops import --list` for the registered importers).",
+    ),
+    output: Path = typer.Option(
+        Path("."),
+        "--output", "-o",
+        help="Target repo root (compliance/ subtree is created beneath it).",
+    ),
+    list_: bool = typer.Option(
+        False,
+        "--list",
+        help="List registered importers and exit.",
+    ),
+) -> None:
+    """Import compliance data from an external tool into this repo."""
+    from regops.importers import get_importer, list_importers
+
+    if list_:
+        names = list_importers()
+        if not names:
+            console.print("[dim]No importers registered.[/dim]")
+        else:
+            console.print("[bold]Available importers:[/bold]")
+            for n in names:
+                console.print(f"  • {n}")
+        return
+
+    try:
+        cls = get_importer(from_)
+    except KeyError as e:
+        console.print(f"[red]{e}[/red]")
+        raise typer.Exit(code=1)
+
+    importer = cls()
+    console.print(f"[bold]RegOps import[/bold] — source: [cyan]{importer.name}[/cyan]")
+    payload = importer.fetch()
+    written = importer.to_compliance_yaml(payload, output)
+    for path in written:
+        console.print(f"  [green]+[/green] {path.relative_to(output)}")
+    console.print()
+    console.print(
+        f"[bold]Imported {len(written)} files[/bold] "
+        f"({len(payload.requirements)} reqs, {len(payload.risks)} risks, "
+        f"{len(payload.tests)} tests). Run [cyan]regops check[/cyan] to validate."
+    )
+
+
 @app.command()
 def report(
     repo: Path = typer.Option(Path("."), "--repo", "-r"),
