@@ -12,6 +12,37 @@ app = typer.Typer(
 )
 console = Console()
 
+reqif_app = typer.Typer(
+    name="reqif",
+    help="ReqIF tooling — inspect today, import in a later phase.",
+    add_completion=False,
+)
+app.add_typer(reqif_app, name="reqif")
+
+
+@reqif_app.command("inspect")
+def reqif_inspect(
+    file: Path = typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="Path to a .reqif file (.reqifz is not yet supported).",
+    ),
+    output_skeleton: Optional[Path] = typer.Option(
+        None,
+        "--output-skeleton", "-o",
+        help="Write the empty mapping skeleton to this file instead of stdout.",
+    ),
+) -> None:
+    """Inspect a ReqIF file: list types, attributes, and relations, then emit
+    an empty mapping skeleton you fill manually before any future import."""
+    from regops.reqif import run_inspect
+
+    rc = run_inspect(console, file, output_skeleton)
+    if rc != 0:
+        raise typer.Exit(code=rc)
+
 
 @app.command()
 def check(
