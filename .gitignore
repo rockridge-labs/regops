@@ -29,8 +29,18 @@ secrets.yaml
 *.swp
 .DS_Store
 
-# Tachikoma session state
-.tachikoma/session-*.md
+# Agent collaboration artefacts — entire directory is private to the maintainer.
+# Generic contribution conventions live in CLAUDE.md (public).
+.tachikoma/
+.openclaw/
+
+# OpenClaw runtime files (workspace identity, heartbeat, tools manifest…)
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
 
 # RegOps local outputs
 traceability-report*.md
