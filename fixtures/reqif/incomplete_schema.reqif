@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<REQ-IF xmlns="http://www.omg.org/spec/ReqIF/20110401/reqif.xsd">
+  <CORE-CONTENT>
+    <REQ-IF-CONTENT>
+      <DATATYPES/>
+      <SPEC-TYPES>
+        <SPEC-OBJECT-TYPE IDENTIFIER="SOT_NAMELESS">
+          <SPEC-ATTRIBUTES/>
+        </SPEC-OBJECT-TYPE>
+        <SPEC-OBJECT-TYPE LONG-NAME="No identifier">
+          <SPEC-ATTRIBUTES/>
+        </SPEC-OBJECT-TYPE>
+      </SPEC-TYPES>
+      <SPEC-OBJECTS>
+        <SPEC-OBJECT IDENTIFIER="SO_TYPED">
+          <VALUES/>
+          <TYPE><SPEC-OBJECT-TYPE-REF>SOT_NAMELESS</SPEC-OBJECT-TYPE-REF></TYPE>
+        </SPEC-OBJECT>
+        <SPEC-OBJECT IDENTIFIER="SO_UNTYPED">
+          <VALUES/>
+        </SPEC-OBJECT>
+        <SPEC-OBJECT>
+          <VALUES/>
+        </SPEC-OBJECT>
+      </SPEC-OBJECTS>
+    </REQ-IF-CONTENT>
+  </CORE-CONTENT>
+</REQ-IF>
